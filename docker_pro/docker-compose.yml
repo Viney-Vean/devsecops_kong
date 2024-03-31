@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  kong-database:
+    image: postgres:9.6
+    environment:
+      POSTGRES_USER: kong
+      POSTGRES_DB: kong
+    volumes:
+      - kong-database:/var/lib/postgresql/data
+
+  kong:
+    image: kong:latest
+    depends_on:
+      - kong-database
+    environment:
+      KONG_DATABASE: postgres
+      KONG_PG_HOST: kong-database
+      KONG_PG_USER: kong
+      KONG_PG_PASSWORD: kong
+    ports:
+      - "8000:8000"   # HTTP Proxy Port
+      - "8443:8443"   # HTTPS Proxy Port
+      - "8001:8001"   # Admin API Port
+      - "8444:8444"   # Admin API HTTPS Port
+    volumes:
+      - kong-plugins:/etc/kong/plugins
+      - kong-data:/usr/local/kong/declarative
+
+volumes:
+  kong-database:
+  kong-plugins:
+  kong-data:
